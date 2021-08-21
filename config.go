@@ -1,4 +1,4 @@
-package main
+package cfg_reader
 
 import "errors"
 

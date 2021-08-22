@@ -3,7 +3,8 @@ package cfg_reader
 import "errors"
 
 type Config struct {
-	Node Dict
+	Node *Node
+	Name string
 }
 
 func NewConfig(file string) *Config {
@@ -12,12 +13,8 @@ func NewConfig(file string) *Config {
 		panic(err)
 	}
 	config := &Config{}
-	dict, ok := node.ToDict()
-	if !ok {
-		println("could not convert to dict")
-		return nil
-	}
-	config.Node = dict
+	config.Node = node
+	config.Name = file
 	return config
 }
 
@@ -65,7 +62,13 @@ func Convert(node *Node) interface{} {
 }
 
 func (c Config) Get(key string) (interface{}, error) {
-	node := c.Node[key]
+
+	dict, ok := c.Node.ToDict()
+	if !ok {
+		return nil, errors.New("could not convert to dict")
+	}
+
+	node := dict[key]
 
 	if node == nil {
 		return nil, errors.New("key not found")
@@ -77,5 +80,18 @@ func (c Config) Get(key string) (interface{}, error) {
 }
 
 func (c Config) Set(key string, value interface{}) {
-	c.Node[key] = NewNode(value)
+	c.Node.Value.(Dict)[key] = NewNode(value)
+}
+
+func (c Config) Serialize(useCommas bool, useApostrophes bool) string {
+	emitter := NewEmitter()
+	emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)
+	return emitter.String()
+}
+
+func (c Config) Save(useCommas bool, useApostrophes bool) error {
+	emitter := NewEmitter()
+	emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)
+	err := WriteFile(c.Name, emitter.String())
+	return err
 }

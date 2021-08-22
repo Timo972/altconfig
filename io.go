@@ -20,3 +20,8 @@ func ReadFile(fileName string) (*Node, error) {
 
 	return node, err
 }
+
+func WriteFile(fileName string, content string) error {
+	err := ioutil.WriteFile(fileName, []byte(content), 0644)
+	return err
+}

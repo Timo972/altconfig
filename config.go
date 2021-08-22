@@ -61,7 +61,7 @@ func Convert(node *Node) interface{} {
 	return nil
 }
 
-func (c Config) Get(key string) (interface{}, error) {
+func (c *Config) Get(key string) (interface{}, error) {
 
 	dict, ok := c.Node.ToDict()
 	if !ok {
@@ -79,20 +79,20 @@ func (c Config) Get(key string) (interface{}, error) {
 	return value, nil
 }
 
-func (c Config) Set(key string, value interface{}) {
+func (c *Config) Set(key string, value interface{}) {
 	node := NewNode(value)
 	dict := c.Node.Value.(Dict)
 	dict[key] = node
 	println(c.Node.Value.(Dict))
 }
 
-func (c Config) Serialize(useCommas bool, useApostrophes bool) string {
+func (c *Config) Serialize(useCommas bool, useApostrophes bool) string {
 	emitter := NewEmitter()
 	emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)
 	return emitter.String()
 }
 
-func (c Config) Save(useCommas bool, useApostrophes bool) error {
+func (c *Config) Save(useCommas bool, useApostrophes bool) error {
 	emitter := NewEmitter()
 	emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)
 	err := WriteFile(c.Name, emitter.String())

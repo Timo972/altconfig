@@ -57,7 +57,7 @@ func (e *Emitter) Emit(node *Node, indent uint, isLast bool, useCommas bool, use
 		i := 0
 		endIdx := len(dict) - 1
 		for key, node := range dict {
-			if node.IsNone() {
+			if node == nil || node.IsNone() {
 				continue
 			}
 			e.Stream += _indent + key + ":"

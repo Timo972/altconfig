@@ -1,4 +1,4 @@
-# cfg-reader -- alt-config bindings for go
+# cfg-reader -- alt-config port in go
 Go package for reading alt-config format config files.
 Used by alt:V Multiplayer.  
 Maybe you want to use this package along the [alt:V Go module](https://github.com/shockdev04/altv-go-module).

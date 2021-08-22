@@ -70,8 +70,19 @@ func (n Node) IsDict() bool {
 }
 
 func (n Node) ToBool() (bool, bool) {
-	val, ok := n.Value.(bool)
-	return val, ok
+	val, ok := n.Value.(string)
+	if !ok {
+		return false, ok
+	}
+	bool := false
+	if val == "true" || val == "yes" {
+		bool = true
+	} else if val == "false" || val == "no" {
+		bool = false
+	} else {
+		ok = false
+	}
+	return bool, ok
 }
 
 func (n Node) ToNumber() (int, bool) {

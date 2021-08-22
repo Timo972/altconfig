@@ -33,11 +33,13 @@ type Parser struct {
 	TokIdx uint
 }
 
+// NewParser create new parser
 func NewParser(content string) *Parser {
 	p := &Parser{Tokens: make([]Token, 0), Buffer: []rune(content), ReadPos: 0, Line: 0, Column: 0, TokIdx: 0}
 	return p
 }
 
+// Parse string to alt-config Node
 func (p *Parser) Parse() (*Node, error) {
 	err := p.Tokenize()
 	if err != nil {
@@ -47,15 +49,18 @@ func (p *Parser) Parse() (*Node, error) {
 	return node, err
 }
 
+// Unread get size of unread bytes
 func (p *Parser) Unread() uint {
 	return uint(len(p.Buffer)) - p.ReadPos
 }
 
+// Peek char at current position with offset
 func (p *Parser) Peek(offset uint) rune {
 	idx := p.ReadPos + offset
 	return rune(p.Buffer[idx])
 }
 
+// Get char at current position and update read position
 func (p *Parser) Get() rune {
 	p.Column++
 	if p.Peek(0) == '\n' {
@@ -67,6 +72,7 @@ func (p *Parser) Get() rune {
 	return p.Buffer[currPos]
 }
 
+// Skip skip n chars
 func (p *Parser) Skip(n uint) {
 	for i := uint(0) ; i < n; i++ {
 		p.Column++
@@ -78,6 +84,7 @@ func (p *Parser) Skip(n uint) {
 	p.ReadPos = p.ReadPos + n
 }
 
+// SkipToNextToken skip until next token
 func (p *Parser) SkipToNextToken() {
 	for p.Unread() > 0 {
 		if p.Peek(0) == ' ' || p.Peek(0) == '\n' || p.Peek(0) == '\r' || p.Peek(0) == '\t' || p.Peek(0) == ',' {
@@ -98,6 +105,7 @@ func (p *Parser) SkipToNextToken() {
 	}
 }
 
+// Tokenize content
 func (p *Parser) Tokenize() error {
 	p.Tokens = append(p.Tokens, Token{Type:TOKEN_DICT_START, Value: "", Pos: 0, Line: 0, Col: 0})
 
@@ -180,6 +188,7 @@ func (p *Parser) Tokenize() error {
 	return nil
 }
 
+// ParseTok parse token to node
 func (p *Parser) ParseTok() (*Node, error) {
 	tok := p.Tokens[p.TokIdx]
 	switch tok.Type {

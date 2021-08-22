@@ -19,6 +19,7 @@ type Node struct {
 	Value interface{}
 }
 
+// NewNode create new node
 func NewNode(val interface{}) *Node {
 	switch val.(type) {
 	case int:
@@ -112,6 +113,7 @@ func (n Node) ToList() (List, bool) {
 	return val, ok
 }
 
+// At value at idx
 func (n Node) At(idx uint) *Node{
 	val, ok := n.Value.(List)
 	if !ok {
@@ -120,6 +122,7 @@ func (n Node) At(idx uint) *Node{
 	return val[idx]
 }
 
+// Get value from key
 func (n Node) Get(key string) *Node {
 	val, ok := n.Value.(Dict)
 	if !ok {

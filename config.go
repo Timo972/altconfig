@@ -7,6 +7,7 @@ type Config struct {
 	Name string
 }
 
+// NewConfig create config
 func NewConfig(file string) *Config {
 	node, err := ReadFile(file)
 	if err != nil {
@@ -18,6 +19,7 @@ func NewConfig(file string) *Config {
 	return config
 }
 
+// Convert node to go value
 func Convert(node *Node) interface{} {
 	for i := 0; i < 5; i++ {
 		switch i {
@@ -61,6 +63,7 @@ func Convert(node *Node) interface{} {
 	return nil
 }
 
+// Get value at key
 func (c *Config) Get(key string) (interface{}, error) {
 
 	dict, ok := c.Node.ToDict()
@@ -79,6 +82,7 @@ func (c *Config) Get(key string) (interface{}, error) {
 	return value, nil
 }
 
+// Set value at key
 func (c *Config) Set(key string, value interface{}) {
 	node := NewNode(value)
 	dict := c.Node.Value.(Dict)
@@ -86,12 +90,14 @@ func (c *Config) Set(key string, value interface{}) {
 	println(c.Node.Value.(Dict))
 }
 
+// Serialize config to string
 func (c *Config) Serialize(useCommas bool, useApostrophes bool) string {
 	emitter := NewEmitter()
 	emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)
 	return emitter.String()
 }
 
+// Save config to file
 func (c *Config) Save(useCommas bool, useApostrophes bool) error {
 	emitter := NewEmitter()
 	emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)

@@ -2,6 +2,7 @@ package cfg_reader
 
 import "io/ioutil"
 
+// ReadFile into node
 func ReadFile(fileName string) (*Node, error) {
 	data, err := ioutil.ReadFile(fileName)
 
@@ -21,6 +22,7 @@ func ReadFile(fileName string) (*Node, error) {
 	return node, err
 }
 
+// WriteFile write file with content
 func WriteFile(fileName string, content string) error {
 	err := ioutil.WriteFile(fileName, []byte(content), 0644)
 	return err

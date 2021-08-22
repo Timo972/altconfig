@@ -2,6 +2,7 @@ package cfg_reader
 
 import "strings"
 
+// Unescape string
 func Unescape(str string) string {
 	res := ""
 	end := len(str) - 1
@@ -35,6 +36,7 @@ func Unescape(str string) string {
 	return res
 }
 
+// Escape string
 func Escape(str string) string {
 	res := ""
 

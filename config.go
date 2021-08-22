@@ -42,12 +42,22 @@ func Convert(node *Node) interface{} {
 		case 3:
 			list, ok := node.ToList()
 			if ok {
-				return list
+				values := make([]interface{}, 0)
+				for _, node := range list {
+					val := Convert(node)
+					values = append(values, val)
+				}
+				return values
 			}
 		case 4:
 			dict, ok := node.ToDict()
 			if ok {
-				return dict
+				values := make(map[string]interface{})
+				for key, node := range dict {
+					val := Convert(node)
+					values[key] = val
+				}
+				return values
 			}
 		}
 	}

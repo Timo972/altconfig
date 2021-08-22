@@ -80,7 +80,10 @@ func (c Config) Get(key string) (interface{}, error) {
 }
 
 func (c Config) Set(key string, value interface{}) {
-	c.Node.Value.(Dict)[key] = NewNode(value)
+	node := NewNode(value)
+	dict := c.Node.Value.(Dict)
+	dict[key] = node
+	println(c.Node.Value.(Dict))
 }
 
 func (c Config) Serialize(useCommas bool, useApostrophes bool) string {

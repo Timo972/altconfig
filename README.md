@@ -16,6 +16,11 @@ modules: [
 resources: [
     test
 ]
+voice: {
+    port: 7789
+    ip: 127.0.0.1
+    external: true
+}
 ```
 ```go
 // main.go
@@ -35,12 +40,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// possible converts: string, int, bool, cfg_reader.Dict = map[string]interface{}, cfg_reader.List = []interface{}
+	// possible converts: string, int, bool, map[string]interface{}, []interface{}
 	port, ok := val.(int)
 	if ! ok {
 		println("could not convert port to int")
 	} else {
 		println(port)
 	}
+	voice, err := cfg.Get("voice")
+	if err != nil {
+		panic(err)
+	}
+	voicePort := voice.(map[string]interface{})["port"]
+	println(voicePort.(int))
 }
 ```

@@ -22,6 +22,7 @@ voice: {
     external: true
 }
 ```
+
 ```go
 // main.go
 package main
@@ -42,7 +43,7 @@ func main() {
 	}
 	// possible converts: string, int, bool, map[string]interface{}, []interface{}
 	port, ok := val.(int)
-	if ! ok {
+	if !ok {
 		println("could not convert port to int")
 	} else {
 		println(port)
@@ -53,5 +54,17 @@ func main() {
 	}
 	voicePort := voice.(map[string]interface{})["port"]
 	println(voicePort.(int))
+
+	cfg.Set("test", "Hello World")
+
+	// saves changes to the file you opened
+	err = cfg.Save(false, false)
+	if err != nil {
+		panic(err)
+	}
+	
+	// serializes into string
+	content := cfg.Serialize(false, false)
+	println(content)
 }
 ```

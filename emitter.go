@@ -1,4 +1,4 @@
-package cfg_reader
+package cfgreader
 
 import (
 	"errors"

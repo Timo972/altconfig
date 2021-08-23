@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Emitter struct
 type Emitter struct {
 	Stream string
 }

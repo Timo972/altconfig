@@ -2,20 +2,27 @@ package cfgreader
 
 import (
 	"errors"
-	"fmt"
 )
 
+// TokenType enum
 type TokenType = uint8
 
 const (
+	// TokenArrayStart array start
 	TokenArrayStart TokenType = iota
+	// TokenArrayEnd array end
 	TokenArrayEnd
+	// TokenDictStart dict start
 	TokenDictStart
+	// TokenDictEnd dict end
 	TokenDictEnd
+	// TokenKey key
 	TokenKey
+	// TokenScalar scalar
 	TokenScalar
 )
 
+// Token struct
 type Token struct {
 	Type TokenType
 	Value string
@@ -153,7 +160,7 @@ func (p *Parser) Tokenize() error {
 					}
 
 					if p.Unread() == 0 {
-						return errors.New(fmt.Sprintf("Unexpected end of file"))
+						return errors.New("unexpected end of file")
 					}
 				}
 

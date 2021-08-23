@@ -2,8 +2,11 @@ package cfgreader
 
 import "strconv"
 
+// Type enum
 type Type = uint8
+// Scalar default type
 type Scalar = string
+// List default type
 type List = []*Node
 // Dict default type
 type Dict = map[string]*Node
@@ -19,6 +22,7 @@ const (
 	DICT
 )
 
+// Node struct
 type Node struct {
 	Type Type
 	Value interface{}
@@ -79,6 +83,7 @@ func (n Node) IsDict() bool {
 	return n.Type == DICT
 }
 
+// ToBool convert node value to bool
 func (n Node) ToBool() (bool, bool) {
 	val, ok := n.Value.(string)
 	if !ok {

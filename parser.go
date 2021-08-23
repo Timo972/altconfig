@@ -8,12 +8,12 @@ import (
 type TokenType = uint8
 
 const (
-	TOKEN_ARRAY_START TokenType = iota
-	TOKEN_ARRAY_END
-	TOKEN_DICT_START
-	TOKEN_DICT_END
-	TOKEN_KEY
-	TOKEN_SCALAR
+	TokenArrayStart TokenType = iota
+	TokenArrayEnd
+	TokenDictStart
+	TokenDictEnd
+	TokenKey
+	TokenScalar
 )
 
 type Token struct {
@@ -24,6 +24,7 @@ type Token struct {
 	Col uint
 }
 
+// Parser struct
 type Parser struct {
 	Tokens []Token
 	Buffer []rune
@@ -107,7 +108,7 @@ func (p *Parser) SkipToNextToken() {
 
 // Tokenize content
 func (p *Parser) Tokenize() error {
-	p.Tokens = append(p.Tokens, Token{Type:TOKEN_DICT_START, Value: "", Pos: 0, Line: 0, Col: 0})
+	p.Tokens = append(p.Tokens, Token{Type:TokenDictStart, Value: "", Pos: 0, Line: 0, Col: 0})
 
 	for p.Unread() > 0 {
 		p.SkipToNextToken()
@@ -118,16 +119,16 @@ func (p *Parser) Tokenize() error {
 
 		if p.Peek(0) == '[' {
 			p.Skip(1)
-			p.Tokens = append(p.Tokens, Token{Type:TOKEN_ARRAY_START, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
+			p.Tokens = append(p.Tokens, Token{Type:TokenArrayStart, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
 		} else if p.Peek(0) == ']' {
 			p.Skip(1)
-			p.Tokens = append(p.Tokens, Token{Type: TOKEN_ARRAY_END, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
+			p.Tokens = append(p.Tokens, Token{Type: TokenArrayEnd, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
 		} else if p.Peek(0) == '{' {
 			p.Skip(1)
-			p.Tokens = append(p.Tokens, Token{Type: TOKEN_DICT_START, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
+			p.Tokens = append(p.Tokens, Token{Type: TokenDictStart, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
 		} else if p.Peek(0) == '}' {
 			p.Skip(1)
-			p.Tokens = append(p.Tokens, Token{Type: TOKEN_DICT_END, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
+			p.Tokens = append(p.Tokens, Token{Type: TokenDictEnd, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
 		} else {
 			//TODO this is not how it should work because if string starts with " it gets added here. Bad.
 			val := "" // string(p.Peek(0))
@@ -174,9 +175,9 @@ func (p *Parser) Tokenize() error {
 			val = Unescape(val)
 
 			if p.Unread() > 0 && p.Peek(0) == ':' {
-				p.Tokens = append(p.Tokens, Token{Type: TOKEN_KEY, Value: val, Pos: p.ReadPos, Line: p.Line, Col: p.Column})
+				p.Tokens = append(p.Tokens, Token{Type: TokenKey, Value: val, Pos: p.ReadPos, Line: p.Line, Col: p.Column})
 			} else {
-				p.Tokens = append(p.Tokens, Token{Type: TOKEN_SCALAR, Value: val, Pos: p.ReadPos, Line: p.Line, Col: p.Column})
+				p.Tokens = append(p.Tokens, Token{Type: TokenScalar, Value: val, Pos: p.ReadPos, Line: p.Line, Col: p.Column})
 			}
 
 			if p.Unread() > 0 && (p.Peek(0) == ':' || p.Peek(0) == ',') {
@@ -184,7 +185,7 @@ func (p *Parser) Tokenize() error {
 			}
 		}
 	}
-	p.Tokens = append(p.Tokens, Token{Type: TOKEN_DICT_END, Value: "", Pos: 0, Line: 0, Col: 0})
+	p.Tokens = append(p.Tokens, Token{Type: TokenDictEnd, Value: "", Pos: 0, Line: 0, Col: 0})
 	return nil
 }
 
@@ -192,11 +193,11 @@ func (p *Parser) Tokenize() error {
 func (p *Parser) ParseTok() (*Node, error) {
 	tok := p.Tokens[p.TokIdx]
 	switch tok.Type {
-	case TOKEN_SCALAR:
+	case TokenScalar:
 		return &Node{Type: SCALAR, Value: tok.Value}, nil
-	case TOKEN_ARRAY_START:
+	case TokenArrayStart:
 		list := make([]*Node, 0)
-		for p.TokIdx < uint(len(p.Tokens)) && p.Tokens[p.TokIdx + 1].Type != TOKEN_ARRAY_END {
+		for p.TokIdx < uint(len(p.Tokens)) && p.Tokens[p.TokIdx + 1].Type != TokenArrayEnd {
 			p.TokIdx++
 			node, err := p.ParseTok()
 			if err != nil {
@@ -207,12 +208,12 @@ func (p *Parser) ParseTok() (*Node, error) {
 		p.TokIdx++
 
 		return &Node{Type: LIST, Value: list}, nil
-	case TOKEN_DICT_START:
+	case TokenDictStart:
 		dict := make(Dict)
-		for p.TokIdx < uint(len(p.Tokens)) && p.Tokens[p.TokIdx + 1].Type != TOKEN_DICT_END {
+		for p.TokIdx < uint(len(p.Tokens)) && p.Tokens[p.TokIdx + 1].Type != TokenDictEnd {
 			p.TokIdx++
 			nextTok := p.Tokens[p.TokIdx]
-			if nextTok.Type != TOKEN_KEY {
+			if nextTok.Type != TokenKey {
 				return nil, errors.New("key expected")
 			}
 			key := nextTok.Value

@@ -2,6 +2,7 @@ package cfgreader
 
 import "errors"
 
+// Config config struct
 type Config struct {
 	Node *Node
 	Name string

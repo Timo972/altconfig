@@ -31,34 +31,22 @@ type Node struct {
 // NewNode create new node
 func NewNode(val interface{}) *Node {
 	switch val.(type) {
-	case int:
-	case uint:
-	case float32:
-	case float64:
-	case bool:
+	case bool, int, uint, float32, float64, int8, int16, int32, int64, uint8, uint16, uint32, uint64, string:
 		return &Node{Type: SCALAR, Value: val}
-	case []int:
-	case []uint:
-	case []float32:
-	case []float64:
-	case []bool:
+	/*case []bool, []int, []uint, []float32, []float64, []string:
 		values := val.([]interface{})
 		nodes := make([]*Node, len(values))
 		for i, value := range values {
 			nodes[i] = NewNode(value)
 		}
 		return &Node{Type: LIST, Value: nodes}
-	case map[string]int:
-	case map[string]uint:
-	case map[string]float32:
-	case map[string]float64:
-	case map[string]bool:
+	case map[string]bool, map[string]int, map[string]uint, map[string]float32, map[string]float64, map[string]string:
 		values := val.(map[string]interface{})
 		node := &Node{Type: DICT, Value: make(Dict)}
 		for key, val := range values {
 			node.Value.(map[string]interface{})[key] = NewNode(val)
 		}
-		return &Node{Type: DICT, Value: node}
+		return &Node{Type: DICT, Value: node}*/
 	}
 	return nil
 }
@@ -85,30 +73,38 @@ func (n Node) IsDict() bool {
 
 // ToBool convert node value to bool
 func (n Node) ToBool() (bool, bool) {
-	val, ok := n.Value.(string)
+	bool, ok := n.Value.(bool)
 	if !ok {
-		return false, ok
-	}
-	bool := false
-	if val == "true" || val == "yes" {
-		bool = true
-	} else if val == "false" || val == "no" {
+		val, ok := n.Value.(string)
+		if !ok {
+			return false, ok
+		}
 		bool = false
-	} else {
-		ok = false
+		if val == "true" || val == "yes" {
+			bool = true
+		} else if val == "false" || val == "no" {
+			bool = false
+		} else {
+			ok = false
+		}
+		return bool, ok
 	}
 	return bool, ok
 }
 
 // ToNumber convert node value to number
 func (n Node) ToNumber() (int, bool) {
-	str, ok := n.Value.(string)
+	val, ok := n.Value.(int)
 	if !ok {
-		return 0, ok
-	}
-	val, err := strconv.Atoi(str)
-	if err != nil {
-		return 0, false
+		str, ok := n.Value.(string)
+		if !ok {
+			return 0, ok
+		}
+		val, err := strconv.Atoi(str)
+		if err != nil {
+			return 0, false
+		}
+		return val, ok
 	}
 	return val, ok
 }

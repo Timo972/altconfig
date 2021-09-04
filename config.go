@@ -1,6 +1,10 @@
 package cfgreader
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"reflect"
+)
 
 // Config config struct
 type Config struct {
@@ -9,15 +13,16 @@ type Config struct {
 }
 
 // NewConfig create config
-func NewConfig(file string) *Config {
+func NewConfig(file string) (*Config, error) {
 	node, err := ReadFile(file)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	config := &Config{}
 	config.Node = node
 	config.Name = file
-	return config
+
+	return config, nil
 }
 
 // Convert node to go value
@@ -75,7 +80,7 @@ func (c *Config) Get(key string) (interface{}, error) {
 	node := dict[key]
 
 	if node == nil {
-		return nil, errors.New("key not found")
+		return nil, fmt.Errorf("key %v not found", key)
 	}
 
 	value := Convert(node)
@@ -154,11 +159,16 @@ func (c *Config) GetList(key string) ([]interface{}, error) {
 }
 
 // Set value at key
-func (c *Config) Set(key string, value interface{}) {
+func (c *Config) Set(key string, value interface{}) error {
 	node := NewNode(value)
+	if node == nil {
+		return fmt.Errorf("unsupported value type %v", reflect.TypeOf(value))
+	}
 	dict := c.Node.Value.(Dict)
 	dict[key] = node
-	println(c.Node.Value.(Dict))
+	//c.Node.Value = dict
+
+	return nil
 }
 
 // Serialize config to string

@@ -82,6 +82,76 @@ func (c *Config) Get(key string) (interface{}, error) {
 	return value, nil
 }
 
+func (c *Config) GetString(key string) (string, error) {
+	val, err := c.Get(key)
+	if err != nil {
+		return "", err
+	}
+
+	str, ok := val.(string)
+	if !ok {
+		return "", errors.New("could not convert to string")
+	}
+
+	return str, nil
+}
+
+func (c *Config) GetInt(key string) (int, error) {
+	val, err := c.Get(key)
+	if err != nil {
+		return 0, err
+	}
+
+	i, ok := val.(int)
+	if !ok {
+		return 0, errors.New("could not convert to int")
+	}
+
+	return i, nil
+}
+
+func (c *Config) GetBool(key string) (bool, error) {
+	val, err := c.Get(key)
+	if err != nil {
+		return false, err
+	}
+
+	b, ok := val.(bool)
+	if !ok {
+		return false, errors.New("could not convert to bool")
+	}
+
+	return b, nil
+}
+
+func (c *Config) GetDict(key string) (map[string]interface{}, error) {
+	val, err := c.Get(key)
+	if err != nil {
+		return nil, err
+	}
+
+	dict, ok := val.(map[string]interface{})
+	if !ok {
+		return nil, errors.New("could not convert to dict")
+	}
+
+	return dict, nil
+}
+
+func (c *Config) GetList(key string) ([]interface{}, error) {
+	val, err := c.Get(key)
+	if err != nil {
+		return nil, err
+	}
+
+	list, ok := val.([]interface{})
+	if !ok {
+		return nil, errors.New("could not convert to list")
+	}
+
+	return list, nil
+}
+
 // Set value at key
 func (c *Config) Set(key string, value interface{}) {
 	node := NewNode(value)

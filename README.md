@@ -1,7 +1,9 @@
-# cfg-reader -- alt-config port in go
+# alt-config port in go
 Go package for reading alt-config format config files.
 Used by alt:V Multiplayer.  
 Maybe you want to use this package along the [alt:V Go module](https://github.com/shockdev04/altv-go-module).
+
+[altMP alt-config (C++)](https://github.com/altmp/alt-config)
 
 ## Usage
 ```js
@@ -28,26 +30,39 @@ voice: {
 package main
 
 import (
-	"github.com/Timo972/cfg-reader"
+	"github.com/Timo972/altconfig"
 )
 
 func main() {
-	cfg := cfg_reader.NewConfig("server.cfg")
-	if cfg == nil {
-		println("file not found")
-		return
+	cfg, err := altconfig.NewConfig("server.cfg")
+	if err != nil {
+		// Error if file not found or not permitted to read
+		panic(err)
 	}
+	
+	// Get a value
 	val, err := cfg.Get("port")
 	if err != nil {
 		panic(err)
 	}
-	// possible converts: string, int, bool, map[string]interface{}, []interface{}
+	// Possible converts: string, int, bool, map[string]interface{}, []interface{}
 	port, ok := val.(int)
 	if !ok {
 		println("could not convert port to int")
 	} else {
 		println(port)
 	}
+	
+	// Get a value of type (Config_GetInt, Config_GetBool, Config_GetString, Config_GetDict, Config_GetList)
+	portValue, err := cfg.GetInt("port")
+	if err != nil {
+		// Error if key is not found or value is not of the type you want to get
+		panic(err)
+    }
+	
+	// Use portValue here
+	println(portValue)
+	
 	voice, err := cfg.Get("voice")
 	if err != nil {
 		panic(err)
@@ -57,13 +72,13 @@ func main() {
 
 	cfg.Set("test", "Hello World")
 
-	// saves changes to the file you opened
+	// Save changes to the file you opened
 	err = cfg.Save(false, false)
 	if err != nil {
 		panic(err)
 	}
 	
-	// serializes into string
+	// Serializes into string
 	content := cfg.Serialize(false, false)
 	println(content)
 }

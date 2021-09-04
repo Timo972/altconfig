@@ -79,19 +79,56 @@ func NewNode(val interface{}) *Node {
 			bitSize = 64
 		}
 		return &Node{Type: SCALAR, Value: strconv.FormatFloat(float, 'E', -1, bitSize)}
-	case []string:
-		values := val.([]string)
-		nodes := make([]*Node, len(values))
-		for i, value := range values {
-			nodes[i] = NewNode(value)
+	case []string, []bool, []int, []uint, []interface{}:
+		nodes := make([]*Node, 0)
+		if v, ok := val.([]interface{}); ok {
+			for _, i := range v {
+				nodes = append(nodes, NewNode(i))
+			}
+		} else if v, ok := val.([]string); ok {
+			for _, i := range v {
+				nodes = append(nodes, NewNode(i))
+			}
+		} else if v, ok := val.([]bool); ok {
+			for _, i := range v {
+				nodes = append(nodes, NewNode(i))
+			}
+		} else if v, ok := val.([]int); ok {
+			for _, i := range v {
+				nodes = append(nodes, NewNode(i))
+			}
+		} else if v, ok := val.([]uint); ok {
+			for _, i := range v {
+				nodes = append(nodes, NewNode(i))
+			}
 		}
+
 		return &Node{Type: LIST, Value: nodes}
-	case map[string]string:
-		values := val.(map[string]string)
+	case map[string]string, map[string]bool, map[string]int, map[string]uint, map[string]interface{}:
 		node := &Node{Type: DICT, Value: make(Dict)}
-		for key, val := range values {
-			node.Value.(Dict)[key] = NewNode(val)
+
+		if v, ok := val.(map[string]interface{}); ok {
+			for key, val := range v {
+				node.Value.(Dict)[key] = NewNode(val)
+			}
+		} else if v, ok := val.(map[string]string); ok {
+			for key, val := range v {
+				node.Value.(Dict)[key] = NewNode(val)
+			}
+		} else if v, ok := val.(map[string]bool); ok {
+			for key, val := range v {
+				node.Value.(Dict)[key] = NewNode(val)
+			}
+		} else if v, ok := val.(map[string]int); ok {
+			for key, val := range v {
+				node.Value.(Dict)[key] = NewNode(val)
+			}
+		} else if v, ok := val.(map[string]uint); ok {
+			for key, val := range v {
+				node.Value.(Dict)[key] = NewNode(val)
+			}
 		}
+
 		return node
 	}
 	return nil

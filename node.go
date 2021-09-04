@@ -6,10 +6,13 @@ import (
 
 // Type enum
 type Type = uint8
+
 // Scalar default type
 type Scalar = string
+
 // List default type
 type List = []*Node
+
 // Dict default type
 type Dict = map[string]*Node
 
@@ -26,7 +29,7 @@ const (
 
 // Node struct
 type Node struct {
-	Type Type
+	Type  Type
 	Value interface{}
 }
 
@@ -118,38 +121,31 @@ func (n Node) IsDict() bool {
 
 // ToBool convert node value to bool
 func (n Node) ToBool() (bool, bool) {
-	//bool, ok := n.Value.(bool)
-	//if !ok {
-		val, ok := n.Value.(string)
-		if !ok {
-			return false, ok
-		}
-		bool := false
-		if val == "true" || val == "yes" {
-			bool = true
-		} else if val == "false" || val == "no" {
-			bool = false
-		} else {
-			ok = false
-		}
-		return bool, ok
-	//}
-	//return bool, ok
+
+	val, ok := n.Value.(string)
+	if !ok {
+		return false, ok
+	}
+	bool := false
+	if val == "true" || val == "yes" {
+		bool = true
+	} else if val == "false" || val == "no" {
+		bool = false
+	} else {
+		ok = false
+	}
+	return bool, ok
 }
 
 // ToNumber convert node value to number
 func (n Node) ToNumber() (int, bool) {
-	val, ok := n.Value.(int)
+	str, ok := n.Value.(string)
 	if !ok {
-		str, ok := n.Value.(string)
-		if !ok {
-			return 0, ok
-		}
-		val, err := strconv.Atoi(str)
-		if err != nil {
-			return 0, false
-		}
-		return val, ok
+		return 0, ok
+	}
+	val, err := strconv.Atoi(str)
+	if err != nil {
+		return 0, false
 	}
 	return val, ok
 }
@@ -173,7 +169,7 @@ func (n Node) ToList() (List, bool) {
 }
 
 // At value at idx
-func (n Node) At(idx uint) *Node{
+func (n Node) At(idx uint) *Node {
 	val, ok := n.Value.(List)
 	if !ok {
 		return nil

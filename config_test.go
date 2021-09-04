@@ -1,4 +1,4 @@
-package cfgreader
+package altconfig
 
 import (
 	"fmt"

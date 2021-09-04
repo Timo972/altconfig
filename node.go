@@ -1,6 +1,8 @@
 package cfgreader
 
-import "strconv"
+import (
+	"strconv"
+)
 
 // Type enum
 type Type = uint8
@@ -31,22 +33,63 @@ type Node struct {
 // NewNode create new node
 func NewNode(val interface{}) *Node {
 	switch val.(type) {
-	case bool, int, uint, float32, float64, int8, int16, int32, int64, uint8, uint16, uint32, uint64, string:
-		return &Node{Type: SCALAR, Value: val}
-	/*case []bool, []int, []uint, []float32, []float64, []string:
-		values := val.([]interface{})
+	case string:
+		return &Node{Type: SCALAR, Value: val.(string)}
+	case bool:
+		return &Node{Type: SCALAR, Value: strconv.FormatBool(val.(bool))}
+	case int, int8, int16, int32, int64:
+		var value string
+		if v, ok := val.(int); ok {
+			value = strconv.FormatInt(int64(v), 10)
+		} else if v, ok := val.(int8); ok {
+			value = strconv.FormatInt(int64(v), 10)
+		} else if v, ok := val.(int16); ok {
+			value = strconv.FormatInt(int64(v), 10)
+		} else if v, ok := val.(int32); ok {
+			value = strconv.FormatInt(int64(v), 10)
+		} else if v, ok := val.(int64); ok {
+			value = strconv.FormatInt(v, 10)
+		}
+		return &Node{Type: SCALAR, Value: value}
+	case uint, uint8, uint16, uint32, uint64:
+		var value string
+		if v, ok := val.(uint); ok {
+			value = strconv.FormatUint(uint64(v), 10)
+		} else if v, ok := val.(uint8); ok {
+			value = strconv.FormatUint(uint64(v), 10)
+		} else if v, ok := val.(uint16); ok {
+			value = strconv.FormatUint(uint64(v), 10)
+		} else if v, ok := val.(uint32); ok {
+			value = strconv.FormatUint(uint64(v), 10)
+		} else if v, ok := val.(uint64); ok {
+			value = strconv.FormatUint(v, 10)
+		}
+		return &Node{Type: SCALAR, Value: value}
+	case float32, float64:
+		var float float64
+		var bitSize int
+		if v, ok := val.(float32); ok {
+			float = float64(v)
+			bitSize = 32
+		} else if v, ok := val.(float64); ok {
+			float = v
+			bitSize = 64
+		}
+		return &Node{Type: SCALAR, Value: strconv.FormatFloat(float, 'E', -1, bitSize)}
+	case []string:
+		values := val.([]string)
 		nodes := make([]*Node, len(values))
 		for i, value := range values {
 			nodes[i] = NewNode(value)
 		}
 		return &Node{Type: LIST, Value: nodes}
-	case map[string]bool, map[string]int, map[string]uint, map[string]float32, map[string]float64, map[string]string:
-		values := val.(map[string]interface{})
+	case map[string]string:
+		values := val.(map[string]string)
 		node := &Node{Type: DICT, Value: make(Dict)}
 		for key, val := range values {
-			node.Value.(map[string]interface{})[key] = NewNode(val)
+			node.Value.(Dict)[key] = NewNode(val)
 		}
-		return &Node{Type: DICT, Value: node}*/
+		return node
 	}
 	return nil
 }
@@ -71,15 +114,17 @@ func (n Node) IsDict() bool {
 	return n.Type == DICT
 }
 
+//TODO revert node converts when there is an actual fix for NewNode
+
 // ToBool convert node value to bool
 func (n Node) ToBool() (bool, bool) {
-	bool, ok := n.Value.(bool)
-	if !ok {
+	//bool, ok := n.Value.(bool)
+	//if !ok {
 		val, ok := n.Value.(string)
 		if !ok {
 			return false, ok
 		}
-		bool = false
+		bool := false
 		if val == "true" || val == "yes" {
 			bool = true
 		} else if val == "false" || val == "no" {
@@ -88,8 +133,8 @@ func (n Node) ToBool() (bool, bool) {
 			ok = false
 		}
 		return bool, ok
-	}
-	return bool, ok
+	//}
+	//return bool, ok
 }
 
 // ToNumber convert node value to number

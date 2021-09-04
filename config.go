@@ -175,13 +175,13 @@ func (c *Config) Set(key string, value interface{}) error {
 func (c *Config) Serialize(useCommas bool, useApostrophes bool) string {
 	emitter := NewEmitter()
 	emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)
-	return emitter.String()
+	return emitter.ToString()
 }
 
 // Save config to file
 func (c *Config) Save(useCommas bool, useApostrophes bool) error {
 	emitter := NewEmitter()
 	emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)
-	err := WriteFile(c.Name, emitter.String())
+	err := WriteFile(c.Name, emitter.ToBytes())
 	return err
 }

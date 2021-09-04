@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -218,9 +219,42 @@ func TestConfig_Set(t *testing.T) {
 }
 
 func TestConfig_Serialize(t *testing.T) {
+	cfg, err := NewConfig(configSampleName)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 
+	cfg.Set("serializeTest", true)
+
+	content := cfg.Serialize(false, false)
+
+	if !strings.Contains(content, "serializeTest: true") {
+		t.Errorf("could not find newly setted value in serialization")
+	}
 }
 
 func TestConfig_Save(t *testing.T) {
+	cfg, err := NewConfig(configSampleName)
+	if err != nil {
+		t.Error(err.Error())
+	}
 
+	err = cfg.Set("saveTest", true)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	err = cfg.Save(false, false)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	bytes, err := ioutil.ReadFile(configSampleName)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !strings.Contains(string(bytes), "saveTest: true") {
+		t.Errorf("could not find newly setted value in saved file")
+	}
 }

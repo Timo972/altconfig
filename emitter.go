@@ -63,7 +63,7 @@ func (e *Emitter) Emit(node *Node, indent uint, isLast bool, useCommas bool, use
 			if node == nil || node.IsNone() {
 				continue
 			}
-			e.Stream += _indent + key + ":"
+			e.Stream += _indent + key + ": "
 			e.Emit(node, indent + 1, i == endIdx, useCommas, useApostrophes)
 			i++
 		}
@@ -80,7 +80,12 @@ func (e *Emitter) Emit(node *Node, indent uint, isLast bool, useCommas bool, use
 	return nil
 }
 
-// Get the serialized string
-func (e *Emitter) String() string {
+// ToString Get the serialized string
+func (e *Emitter) ToString() string {
 	return e.Stream
+}
+
+// ToBytes Get the serialized bytes
+func (e *Emitter) ToBytes() []byte {
+	return []byte(e.Stream)
 }

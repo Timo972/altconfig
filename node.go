@@ -1,19 +1,28 @@
-package cfg_reader
+package cfgreader
 
 import "strconv"
 
+// Type enum
 type Type = uint8
+// Scalar default type
 type Scalar = string
+// List default type
 type List = []*Node
+// Dict default type
 type Dict = map[string]*Node
 
 const (
+	// NONE node type
 	NONE Type = iota
+	// SCALAR node type
 	SCALAR
+	// LIST node type
 	LIST
+	// DICT node type
 	DICT
 )
 
+// Node struct
 type Node struct {
 	Type Type
 	Value interface{}
@@ -54,22 +63,27 @@ func NewNode(val interface{}) *Node {
 	return nil
 }
 
+// IsNone check if node value is nil
 func (n Node) IsNone() bool {
 	return n.Type == NONE
 }
 
+// IsScalar check if node value is string
 func (n Node) IsScalar() bool {
 	return n.Type == SCALAR
 }
 
+// IsList check if node value is list
 func (n Node) IsList() bool {
 	return n.Type == LIST
 }
 
+// IsDict check if node value is dict
 func (n Node) IsDict() bool {
 	return n.Type == DICT
 }
 
+// ToBool convert node value to bool
 func (n Node) ToBool() (bool, bool) {
 	val, ok := n.Value.(string)
 	if !ok {
@@ -86,6 +100,7 @@ func (n Node) ToBool() (bool, bool) {
 	return bool, ok
 }
 
+// ToNumber convert node value to number
 func (n Node) ToNumber() (int, bool) {
 	str, ok := n.Value.(string)
 	if !ok {
@@ -98,16 +113,19 @@ func (n Node) ToNumber() (int, bool) {
 	return val, ok
 }
 
+// ToString convert node value to string
 func (n Node) ToString() (string, bool) {
 	val, ok := n.Value.(string)
 	return val, ok
 }
 
+// ToDict convert node value to dict
 func (n Node) ToDict() (Dict, bool) {
 	val, ok := n.Value.(Dict)
 	return val, ok
 }
 
+// ToList convert node value to list
 func (n Node) ToList() (List, bool) {
 	val, ok := n.Value.(List)
 	return val, ok

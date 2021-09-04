@@ -1,20 +1,21 @@
-package cfg_reader
+package cfgreader
 
 import (
 	"errors"
 	"strings"
 )
 
+// Emitter struct
 type Emitter struct {
 	Stream string
 }
 
-// Create new emitter instance
+// NewEmitter Create new emitter instance
 func NewEmitter() *Emitter {
 	return &Emitter{Stream: ""}
 }
 
-// Serialize node
+// Emit Serialize node
 func (e *Emitter) Emit(node *Node, indent uint, isLast bool, useCommas bool, useApostrophes bool) error {
 	_indent := strings.Repeat(" ", int(indent * 2))
 

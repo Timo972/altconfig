@@ -10,9 +10,8 @@ import (
 )
 
 const (
-	configSampleName = "alt-config.cfg"
-	configSampleContent =
-`
+	configSampleName    = "alt-config.cfg"
+	configSampleContent = `
 name: Test,
 port: 7788,
 announce: true,
@@ -50,7 +49,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestNewConfig(t *testing.T) {
-	cfg, err := NewConfig(configSampleName)
+	cfg, err := New(configSampleName)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -61,7 +60,7 @@ func TestNewConfig(t *testing.T) {
 }
 
 func TestConfig_Get(t *testing.T) {
-	cfg, err := NewConfig(configSampleName)
+	cfg, err := New(configSampleName)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -78,7 +77,7 @@ func TestConfig_Get(t *testing.T) {
 }
 
 func TestConfig_GetBool(t *testing.T) {
-	cfg, err := NewConfig(configSampleName)
+	cfg, err := New(configSampleName)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -94,7 +93,7 @@ func TestConfig_GetBool(t *testing.T) {
 }
 
 func TestConfig_GetInt(t *testing.T) {
-	cfg, err := NewConfig(configSampleName)
+	cfg, err := New(configSampleName)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -110,7 +109,7 @@ func TestConfig_GetInt(t *testing.T) {
 }
 
 func TestConfig_GetString(t *testing.T) {
-	cfg, err := NewConfig(configSampleName)
+	cfg, err := New(configSampleName)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -126,7 +125,7 @@ func TestConfig_GetString(t *testing.T) {
 }
 
 func TestConfig_GetList(t *testing.T) {
-	cfg, err := NewConfig(configSampleName)
+	cfg, err := New(configSampleName)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -147,7 +146,7 @@ func TestConfig_GetList(t *testing.T) {
 }
 
 func TestConfig_GetDict(t *testing.T) {
-	cfg, err := NewConfig(configSampleName)
+	cfg, err := New(configSampleName)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -168,13 +167,13 @@ func TestConfig_GetDict(t *testing.T) {
 }
 
 func TestConfig_Set(t *testing.T) {
-	cfg, err := NewConfig(configSampleName)
+	cfg, err := New(configSampleName)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
 	scenarios := []struct {
-		key string
+		key   string
 		value interface{}
 	}{
 		{"newBool", true},
@@ -219,14 +218,20 @@ func TestConfig_Set(t *testing.T) {
 }
 
 func TestConfig_Serialize(t *testing.T) {
-	cfg, err := NewConfig(configSampleName)
+	cfg, err := New(configSampleName)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
-	cfg.Set("serializeTest", true)
+	err = cfg.Set("serializeTest", true)
+	if err != nil {
+		t.Error(err.Error())
+	}
 
-	content := cfg.Serialize(false, false)
+	content, err := cfg.Serialize(false, false)
+	if err != nil {
+		t.Error(err.Error())
+	}
 
 	if !strings.Contains(content, "serializeTest: true") {
 		t.Errorf("could not find newly setted value in serialization")
@@ -234,7 +239,7 @@ func TestConfig_Serialize(t *testing.T) {
 }
 
 func TestConfig_Save(t *testing.T) {
-	cfg, err := NewConfig(configSampleName)
+	cfg, err := New(configSampleName)
 	if err != nil {
 		t.Error(err.Error())
 	}

@@ -3,18 +3,19 @@ package altconfig
 import (
 	"errors"
 	"fmt"
+	"github.com/Timo972/altconfig/internal"
 	"reflect"
 )
 
 // Config config struct
 type Config struct {
-	Node *Node
+	Node *internal.Node
 	Name string
 }
 
-// NewConfig create config
-func NewConfig(file string) (*Config, error) {
-	node, err := ReadFile(file)
+// New create config
+func New(file string) (*Config, error) {
+	node, err := internal.ReadFile(file)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +27,7 @@ func NewConfig(file string) (*Config, error) {
 }
 
 // Convert node to go value
-func Convert(node *Node) interface{} {
+func convert(node *internal.Node) interface{} {
 	for i := 0; i < 5; i++ {
 		switch i {
 		case 0:
@@ -49,7 +50,7 @@ func Convert(node *Node) interface{} {
 			if ok {
 				values := make([]interface{}, 0)
 				for _, node := range list {
-					val := Convert(node)
+					val := convert(node)
 					values = append(values, val)
 				}
 				return values
@@ -59,7 +60,7 @@ func Convert(node *Node) interface{} {
 			if ok {
 				values := make(map[string]interface{})
 				for key, node := range dict {
-					val := Convert(node)
+					val := convert(node)
 					values[key] = val
 				}
 				return values
@@ -83,7 +84,7 @@ func (c *Config) Get(key string) (interface{}, error) {
 		return nil, fmt.Errorf("key %v not found", key)
 	}
 
-	value := Convert(node)
+	value := convert(node)
 
 	return value, nil
 }
@@ -160,11 +161,11 @@ func (c *Config) GetList(key string) ([]interface{}, error) {
 
 // Set value at key
 func (c *Config) Set(key string, value interface{}) error {
-	node := NewNode(value)
+	node := internal.NewNode(value)
 	if node == nil {
 		return fmt.Errorf("unsupported value type %v", reflect.TypeOf(value))
 	}
-	dict := c.Node.Value.(Dict)
+	dict := c.Node.Value.(internal.Dict)
 	dict[key] = node
 	//c.Node.Value = dict
 
@@ -172,16 +173,40 @@ func (c *Config) Set(key string, value interface{}) error {
 }
 
 // Serialize config to string
-func (c *Config) Serialize(useCommas bool, useApostrophes bool) string {
-	emitter := NewEmitter()
-	emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)
-	return emitter.ToString()
+func (c *Config) Serialize(useCommas bool, useApostrophes bool) (string, error) {
+	emitter := internal.NewEmitter()
+	err := emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)
+	return emitter.ToString(), err
 }
 
 // Save config to file
 func (c *Config) Save(useCommas bool, useApostrophes bool) error {
-	emitter := NewEmitter()
-	emitter.Emit(c.Node, 0, true, useCommas, useApostrophes)
-	err := WriteFile(c.Name, emitter.ToBytes())
+	emitter := internal.NewEmitter()
+	if err := emitter.Emit(c.Node, 0, true, useCommas, useApostrophes); err != nil {
+		return err
+	}
+	err := internal.WriteFile(c.Name, emitter.ToBytes())
 	return err
+}
+
+func Parse(data []byte) (*Config, error) {
+	parser := internal.NewParser(string(data))
+	node, err := parser.Parse()
+	if err != nil {
+		return nil, err
+	}
+	config := &Config{}
+	config.Node = node
+	return config, nil
+}
+
+func ParseString(data string) (*Config, error) {
+	parser := internal.NewParser(data)
+	node, err := parser.Parse()
+	if err != nil {
+		return nil, err
+	}
+	config := &Config{}
+	config.Node = node
+	return config, nil
 }

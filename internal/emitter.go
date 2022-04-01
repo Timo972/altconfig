@@ -1,4 +1,4 @@
-package altconfig
+package internal
 
 import (
 	"errors"
@@ -17,7 +17,7 @@ func NewEmitter() *Emitter {
 
 // Emit Serialize node
 func (e *Emitter) Emit(node *Node, indent uint, isLast bool, useCommas bool, useApostrophes bool) error {
-	_indent := strings.Repeat(" ", int(indent * 2))
+	_indent := strings.Repeat(" ", int(indent*2))
 
 	if node.IsScalar() {
 		str, ok := node.ToString()
@@ -40,9 +40,9 @@ func (e *Emitter) Emit(node *Node, indent uint, isLast bool, useCommas bool, use
 		end := len(list) - 1
 		for i, node := range list {
 			e.Stream += _indent
-			e.Emit(node, indent + 1, i == end, useCommas, useApostrophes)
+			e.Emit(node, indent+1, i == end, useCommas, useApostrophes)
 		}
-		e.Stream += strings.Repeat(" ", int((indent - 1) * 2))
+		e.Stream += strings.Repeat(" ", int((indent-1)*2))
 		if isLast || !useCommas {
 			e.Stream += "]\n"
 		} else {
@@ -64,12 +64,12 @@ func (e *Emitter) Emit(node *Node, indent uint, isLast bool, useCommas bool, use
 				continue
 			}
 			e.Stream += _indent + key + ": "
-			e.Emit(node, indent + 1, i == endIdx, useCommas, useApostrophes)
+			e.Emit(node, indent+1, i == endIdx, useCommas, useApostrophes)
 			i++
 		}
 
 		if indent > 0 {
-			e.Stream += strings.Repeat(" ", int((indent - 1) * 2))
+			e.Stream += strings.Repeat(" ", int((indent-1)*2))
 			if isLast || !useCommas {
 				e.Stream += "}\n"
 			} else {

@@ -1,4 +1,4 @@
-package altconfig
+package internal
 
 import (
 	"errors"
@@ -24,21 +24,21 @@ const (
 
 // Token struct
 type Token struct {
-	Type TokenType
+	Type  TokenType
 	Value string
-	Pos uint
-	Line uint
-	Col uint
+	Pos   uint
+	Line  uint
+	Col   uint
 }
 
 // Parser struct
 type Parser struct {
-	Tokens []Token
-	Buffer []rune
+	Tokens  []Token
+	Buffer  []rune
 	ReadPos uint
-	Line uint
-	Column uint
-	TokIdx uint
+	Line    uint
+	Column  uint
+	TokIdx  uint
 }
 
 // NewParser create new parser
@@ -82,7 +82,7 @@ func (p *Parser) Get() rune {
 
 // Skip skip n chars
 func (p *Parser) Skip(n uint) {
-	for i := uint(0) ; i < n; i++ {
+	for i := uint(0); i < n; i++ {
 		p.Column++
 		if p.Peek(i) == '\n' {
 			p.Line++
@@ -115,7 +115,7 @@ func (p *Parser) SkipToNextToken() {
 
 // Tokenize content
 func (p *Parser) Tokenize() error {
-	p.Tokens = append(p.Tokens, Token{Type:TokenDictStart, Value: "", Pos: 0, Line: 0, Col: 0})
+	p.Tokens = append(p.Tokens, Token{Type: TokenDictStart, Value: "", Pos: 0, Line: 0, Col: 0})
 
 	for p.Unread() > 0 {
 		p.SkipToNextToken()
@@ -126,7 +126,7 @@ func (p *Parser) Tokenize() error {
 
 		if p.Peek(0) == '[' {
 			p.Skip(1)
-			p.Tokens = append(p.Tokens, Token{Type:TokenArrayStart, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
+			p.Tokens = append(p.Tokens, Token{Type: TokenArrayStart, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
 		} else if p.Peek(0) == ']' {
 			p.Skip(1)
 			p.Tokens = append(p.Tokens, Token{Type: TokenArrayEnd, Value: "", Pos: p.ReadPos, Line: p.Line, Col: p.Column})
@@ -204,7 +204,7 @@ func (p *Parser) ParseTok() (*Node, error) {
 		return &Node{Type: SCALAR, Value: tok.Value}, nil
 	case TokenArrayStart:
 		list := make([]*Node, 0)
-		for p.TokIdx < uint(len(p.Tokens)) && p.Tokens[p.TokIdx + 1].Type != TokenArrayEnd {
+		for p.TokIdx < uint(len(p.Tokens)) && p.Tokens[p.TokIdx+1].Type != TokenArrayEnd {
 			p.TokIdx++
 			node, err := p.ParseTok()
 			if err != nil {
@@ -217,7 +217,7 @@ func (p *Parser) ParseTok() (*Node, error) {
 		return &Node{Type: LIST, Value: list}, nil
 	case TokenDictStart:
 		dict := make(Dict)
-		for p.TokIdx < uint(len(p.Tokens)) && p.Tokens[p.TokIdx + 1].Type != TokenDictEnd {
+		for p.TokIdx < uint(len(p.Tokens)) && p.Tokens[p.TokIdx+1].Type != TokenDictEnd {
 			p.TokIdx++
 			nextTok := p.Tokens[p.TokIdx]
 			if nextTok.Type != TokenKey {

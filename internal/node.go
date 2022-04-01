@@ -1,4 +1,4 @@
-package altconfig
+package internal
 
 import (
 	"strconv"

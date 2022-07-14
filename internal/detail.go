@@ -6,29 +6,25 @@ import "strings"
 func Unescape(str string) string {
 	res := ""
 	end := len(str) - 1
-	for pos, char := range str {
-		c := string(char)
-		if c == "\\" && pos != end {
-			c = string(str[pos+1])
+
+	for p, c := range str {
+		if c == '\\' && p != end {
+			c = rune(str[p+1])
 			switch c {
-			case "n":
-			case "\n":
+			case 'n', '\n':
 				res += "\n"
-			case "r":
+			case 'r':
 				res += "\r"
-			case "'":
-			case "\"":
-			case "\\":
-				res += c
+			case '\'', '"', '\\':
+				res += string(c)
 			default:
-				res += "\\"
-				res += c
+				res += "\\" + string(c)
 			}
 
 			continue
 		}
 
-		res += c
+		res += string(c)
 	}
 
 	res = strings.TrimSpace(res)
@@ -40,21 +36,18 @@ func Unescape(str string) string {
 func Escape(str string) string {
 	res := ""
 
-	for _, char := range str {
-		c := string(char)
+	for _, c := range str {
 
 		switch c {
-		case "\n":
+		case '\n':
 			res += "\\n"
-		case "\r":
+		case '\r':
 			res += "\\r"
-		case "'":
-		case "\"":
-		case "\\":
+		case '\\', '"', '\'':
 			res += "\\"
-			res += c
+			res += string(c)
 		default:
-			res += c
+			res += string(c)
 		}
 	}
 

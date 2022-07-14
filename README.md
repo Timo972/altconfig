@@ -6,14 +6,14 @@ Maybe you want to use this package along the [alt:V Go module](https://github.co
 [altMP alt-config (C++)](https://github.com/altmp/alt-config)
 
 ## Usage
-```js
-// server.cfg
+```bash
+# server.cfg
 name: Test
 port: 7788
 announce: true
 token: 'my token with special chars'
 modules: [
-    go-module
+    'go-module'
 ]
 resources: [
     test
@@ -30,56 +30,45 @@ voice: {
 package main
 
 import (
-	"github.com/Timo972/altconfig"
+	"fmt"
+	"github.com/timo972/altconfig/schemes"
+	"io/ioutil"
+	"github.com/timo972/altconfig"
+)
+
+const (
+	ServerConfigFile = "server.cfg"
 )
 
 func main() {
-	cfg, err := altconfig.NewConfig("server.cfg")
+	data, err := ioutil.ReadFile(ServerConfigFile)
 	if err != nil {
 		// Error if file not found or not permitted to read
 		panic(err)
 	}
-	
-	// Get a value
-	val, err := cfg.Get("port")
+
+	// schemes package contains predefined alt:V Config files (server.cfg, resource.cfg, stream.cfg voice.cfg, altv.cfg)
+	var config schemes.ServerConfig
+	err = altconfig.Unmarshal(data, &config)
 	if err != nil {
 		panic(err)
 	}
-	// Possible converts: string, int, bool, map[string]interface{}, []interface{}
-	port, ok := val.(int)
-	if !ok {
-		println("could not convert port to int")
-	} else {
-		println(port)
-	}
+
+	// Access server.cfg name field
+	fmt.Printf("Server Name: %s\n", config.Name)
+
+	// Set server port
+	config.Port = 7787
 	
-	// Get a value of type (Config_GetInt, Config_GetBool, Config_GetString, Config_GetDict, Config_GetList)
-	portValue, err := cfg.GetInt("port")
+	data, err = altconfig.Marshal(config)
 	if err != nil {
-		// Error if key is not found or value is not of the type you want to get
 		panic(err)
     }
 	
-	// Use portValue here
-	println(portValue)
-	
-	voice, err := cfg.Get("voice")
+	// Save server.cfg with port changed to 7787
+	err = ioutil.WriteFile(ServerConfigFile, data, 0644)
 	if err != nil {
 		panic(err)
-	}
-	voicePort := voice.(map[string]interface{})["port"]
-	println(voicePort.(int))
-
-	cfg.Set("test", "Hello World")
-
-	// Save changes to the file you opened
-	err = cfg.Save(false, false)
-	if err != nil {
-		panic(err)
-	}
-	
-	// Serializes into string
-	content := cfg.Serialize(false, false)
-	println(content)
+    }
 }
 ```

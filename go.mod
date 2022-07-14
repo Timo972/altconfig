@@ -1,3 +1,3 @@
-module github.com/Timo972/altconfig
+module github.com/timo972/altconfig
 
-go 1.16
+go 1.14

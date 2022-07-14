@@ -1,91 +1,126 @@
 package internal
 
 import (
-	"errors"
+	"bytes"
+	"fmt"
+	"reflect"
 	"strings"
 )
 
+func GetTagName(t reflect.StructField) string {
+	name := t.Tag.Get("alt")
+	if name == "" {
+		name = t.Name
+	}
+
+	return name
+}
+
 // Emitter struct
 type Emitter struct {
-	Stream string
+	Buffer *bytes.Buffer
 }
 
 // NewEmitter Create new emitter instance
 func NewEmitter() *Emitter {
-	return &Emitter{Stream: ""}
+	return &Emitter{Buffer: bytes.NewBuffer(make([]byte, 0))}
+}
+
+func (e *Emitter) writeValue(scalar string, isLast bool) {
+	specials := strings.Count(scalar, " ")
+
+	if specials > 0 {
+		e.Buffer.WriteString("'" + scalar + "'")
+	} else {
+		e.Buffer.WriteString(scalar)
+	}
+
+	if !isLast {
+		e.Buffer.WriteString(",\n")
+	} else {
+		e.Buffer.WriteRune('\n')
+	}
 }
 
 // Emit Serialize node
-func (e *Emitter) Emit(node *Node, indent uint, isLast bool, useCommas bool, useApostrophes bool) error {
+func (e *Emitter) Emit(v interface{}, indent uint, isLast bool) error {
 	_indent := strings.Repeat(" ", int(indent*2))
 
-	if node.IsScalar() {
-		str, ok := node.ToString()
-		if !ok {
-			return errors.New("failed to emit")
-		}
-		specialChars := strings.Count(str, " ")
-		if useApostrophes || specialChars > 0 {
-			e.Stream += "'" + Escape(str) + "'\n"
-		} else {
-			e.Stream += Escape(str) + "\n"
-		}
-	} else if node.IsList() {
-		e.Stream += "[\n"
+	rt := reflect.TypeOf(v)
+	rv := reflect.ValueOf(v)
+	kind := rt.Kind()
+	if kind == reflect.Pointer {
+		rt = rt.Elem()
+		rv = rv.Elem()
+		kind = rt.Kind()
+	}
 
-		list, ok := node.ToList()
-		if !ok {
-			return errors.New("failed to emit list")
+	if kind == reflect.String {
+		str := Escape(rv.String())
+		e.writeValue(str, isLast)
+	} else if kind == reflect.Bool {
+		str := fmt.Sprintf("%v", rv.Bool())
+		e.writeValue(str, isLast)
+	} else if kind == reflect.Int || kind == reflect.Int8 || kind == reflect.Int16 || kind == reflect.Int32 || kind == reflect.Int64 {
+		str := fmt.Sprintf("%v", rv.Int())
+		e.writeValue(str, isLast)
+	} else if kind == reflect.Uint || kind == reflect.Uint8 || kind == reflect.Uint16 || kind == reflect.Uint32 || kind == reflect.Uint64 {
+		str := fmt.Sprintf("%v", rv.Uint())
+		e.writeValue(str, isLast)
+	} else if kind == reflect.Float32 || kind == reflect.Float64 {
+		str := fmt.Sprintf("%v", rv.Float())
+		e.writeValue(str, isLast)
+	} else if kind == reflect.Slice || kind == reflect.Array {
+		e.Buffer.WriteString("[\n")
+
+		l := rv.Len()
+		for i := 0; i < l; i++ {
+			e.Buffer.WriteString(_indent)
+			err := e.Emit(rv.Index(i).Interface(), indent+1, i >= l-1)
+			if err != nil {
+				return err
+			}
 		}
-		end := len(list) - 1
-		for i, node := range list {
-			e.Stream += _indent
-			e.Emit(node, indent+1, i == end, useCommas, useApostrophes)
-		}
-		e.Stream += strings.Repeat(" ", int((indent-1)*2))
-		if isLast || !useCommas {
-			e.Stream += "]\n"
+
+		e.Buffer.WriteString(strings.Repeat(" ", int((indent-1)*2)))
+		e.Buffer.WriteString("]")
+
+		if !isLast {
+			e.Buffer.WriteString(",\n")
 		} else {
-			e.Stream += "],\n"
+			e.Buffer.WriteRune('\n')
 		}
-	} else if node.IsDict() {
+	} else if kind == reflect.Struct {
 		if indent > 0 {
-			e.Stream += "{\n"
+			e.Buffer.WriteString("{\n")
 		}
 
-		dict, ok := node.ToDict()
-		if !ok {
-			return errors.New("failed to emit dict")
-		}
-		i := 0
-		endIdx := len(dict) - 1
-		for key, node := range dict {
-			if node == nil || node.IsNone() {
+		fc := rv.NumField()
+		for i := 0; i < fc; i++ {
+			field := rv.Field(i)
+			ft := rt.Field(i)
+			key := GetTagName(ft)
+
+			if !ft.IsExported() || field.IsZero() {
 				continue
 			}
-			e.Stream += _indent + key + ": "
-			e.Emit(node, indent+1, i == endIdx, useCommas, useApostrophes)
-			i++
+
+			e.Buffer.WriteString(_indent + key + ": ")
+			err := e.Emit(field.Interface(), indent+1, i >= fc-1)
+			if err != nil {
+				return err
+			}
 		}
 
 		if indent > 0 {
-			e.Stream += strings.Repeat(" ", int((indent-1)*2))
-			if isLast || !useCommas {
-				e.Stream += "}\n"
-			} else {
-				e.Stream += "},\n"
-			}
+			e.Buffer.WriteString(strings.Repeat(" ", int((indent-1)*2)))
+			e.Buffer.WriteRune('}')
+		}
+
+		if !isLast {
+			e.Buffer.WriteString(",\n")
 		}
 	}
+
 	return nil
-}
-
-// ToString Get the serialized string
-func (e *Emitter) ToString() string {
-	return e.Stream
-}
-
-// ToBytes Get the serialized bytes
-func (e *Emitter) ToBytes() []byte {
-	return []byte(e.Stream)
 }

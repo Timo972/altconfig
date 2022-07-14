@@ -1,7 +1,6 @@
 # alt-config port in go
-Go package for reading alt-config format config files.
-Used by alt:V Multiplayer.  
-Maybe you want to use this package along the [alt:V Go module](https://github.com/shockdev04/altv-go-module).
+Go package for reading alt-config format config files which are used by alt:V Multiplayer.  
+Maybe you want to use this package along the [alt:V Go module](https://github.com/timo972/altv-go).
 
 [altMP alt-config (C++)](https://github.com/altmp/alt-config)
 

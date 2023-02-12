@@ -4,6 +4,9 @@ Maybe you want to use this package along the [alt:V Go module](https://github.co
 
 [altMP alt-config (C++)](https://github.com/altmp/alt-config)
 
+## Deprecation notice
+⚠️ alt:V has moved to toml configuration files, so this package is obsolete
+
 ## Usage
 ```bash
 # server.cfg
